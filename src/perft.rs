@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-use crate::position::Position;
+use crate::{position::Position, uci::Uci};
 
 /// Counts legal move paths of a given length.
 ///

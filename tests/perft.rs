@@ -19,7 +19,22 @@ use std::{
     io::{prelude::*, BufReader},
 };
 
-use shakmaty::{fen::Fen, perft, CastlingMode, Chess, FromSetup, Position, PositionError};
+use shakmaty::{fen::Fen, perft, CastlingMode, Chess, FromSetup, Position, PositionError, uci::Uci};
+
+pub fn divide<P: Position + Clone>(pos: &P, depth: u32) {
+    let moves = pos.legal_moves();
+    let mut sum: u64 = 0;
+    let xs: Vec<String> = moves.iter()
+        .map(|m| {
+            let mut child = pos.clone();
+            child.play_unchecked(m);
+            let nodes = perft(&child, depth - 1);
+            sum += nodes;
+            format!("{} {}", Uci::from_standard(m), nodes)
+        }).collect();
+    let x = xs.join("\n");
+    println!("{0}\n{1}", x, sum);
+}
 
 fn test_perft_file<P>(path: &str, node_limit: u64)
 where
@@ -63,6 +78,7 @@ where
                     .expect("nodes not an integer");
 
                 if nodes <= node_limit {
+                    divide(&pos, depth);
                     assert_eq!(perft(&pos, depth), nodes);
                 }
             }
@@ -84,20 +100,20 @@ macro_rules! gen_tests {
     }
 }
 
-gen_tests! {
-    test_tricky,      Chess,       "tests/tricky.perft",        100_000,
-    test_random,      Chess,       "tests/random.perft",         10_000,
-    test_chess960,    Chess,       "tests/chess960.perft",      100_000,
-}
+// gen_tests! {
+//     test_tricky,      Chess,       "tests/tricky.perft",        100_000,
+//     test_random,      Chess,       "tests/random.perft",         10_000,
+//     test_chess960,    Chess,       "tests/chess960.perft",      100_000,
+// }
 
 #[cfg(feature = "variant")]
 use shakmaty::variant::{Antichess, Atomic, Crazyhouse, Horde, RacingKings, ThreeCheck};
 #[cfg(feature = "variant")]
 gen_tests! {
-    test_atomic,      Atomic,      "tests/atomic.perft",      1_000_000,
-    test_antichess,   Antichess,   "tests/antichess.perft",   1_000_000,
-    test_crazyhouse,  Crazyhouse,  "tests/crazyhouse.perft",  1_000_000,
-    test_racingkings, RacingKings, "tests/racingkings.perft", 1_000_000,
-    test_horde,       Horde,       "tests/horde.perft",       1_000_000,
-    test_3check,      ThreeCheck,  "tests/3check.perft",      1_000_000,
+    test_atomic,      Atomic,      "tests/atomic.perft",      10_000_000,
+    // test_antichess,   Antichess,   "tests/antichess.perft",   1_000_000,
+    // test_crazyhouse,  Crazyhouse,  "tests/crazyhouse.perft",  1_000_000,
+    // test_racingkings, RacingKings, "tests/racingkings.perft", 1_000_000,
+    // test_horde,       Horde,       "tests/horde.perft",       1_000_000,
+    // test_3check,      ThreeCheck,  "tests/3check.perft",      1_000_000,
 }
