@@ -24,7 +24,7 @@ use shakmaty::{fen::Fen, perft, CastlingMode, Chess, FromSetup, Position, Positi
 pub fn divide<P: Position + Clone>(pos: &P, depth: u32) {
     let moves = pos.legal_moves();
     let mut sum: u64 = 0;
-    let xs: Vec<String> = moves.iter()
+    let mut xs: Vec<String> = moves.iter()
         .map(|m| {
             let mut child = pos.clone();
             child.play_unchecked(m);
@@ -32,6 +32,7 @@ pub fn divide<P: Position + Clone>(pos: &P, depth: u32) {
             sum += nodes;
             format!("{} {}", Uci::from_standard(m), nodes)
         }).collect();
+    xs.sort();
     let x = xs.join("\n");
     println!("{0}\n{1}", x, sum);
 }
@@ -110,9 +111,9 @@ macro_rules! gen_tests {
 use shakmaty::variant::{Antichess, Atomic, Crazyhouse, Horde, RacingKings, ThreeCheck};
 #[cfg(feature = "variant")]
 gen_tests! {
-    test_atomic,      Atomic,      "tests/atomic.perft",      10_000_000,
+    // test_atomic,      Atomic,      "tests/atomic.perft",      10_000_000,
     // test_antichess,   Antichess,   "tests/antichess.perft",   1_000_000,
-    // test_crazyhouse,  Crazyhouse,  "tests/crazyhouse.perft",  1_000_000,
+    test_crazyhouse,  Crazyhouse,  "tests/crazyhouse.perft",  1_000_000,
     // test_racingkings, RacingKings, "tests/racingkings.perft", 1_000_000,
     // test_horde,       Horde,       "tests/horde.perft",       1_000_000,
     // test_3check,      ThreeCheck,  "tests/3check.perft",      1_000_000,
